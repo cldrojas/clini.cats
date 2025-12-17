@@ -1,24 +1,31 @@
-"use client"
+'use client'
 
-import type React from "react"
+import type React from 'react'
 
-import { createClient } from "@/lib/supabase/client"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { Cat } from "lucide-react"
+import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { Cat } from 'lucide-react'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
+    console.log(`function handleLogin`)
     e.preventDefault()
     const supabase = createClient()
     setIsLoading(true)
@@ -27,15 +34,17 @@ export default function LoginPage() {
     try {
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
-        password,
+        password
       })
+
       if (authError) throw authError
 
+      console.log(`DEBUG:redirecting to dashboard:`)
       // Redirect to dashboard - server will handle role-based routing
-      router.push("/dashboard")
-      router.refresh()
+      router.push('/dashboard')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Error al iniciar sesión")
+      console.log(`DEBUG:err:`, err)
+      setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
     } finally {
       setIsLoading(false)
     }
@@ -49,8 +58,11 @@ export default function LoginPage() {
             <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
               <Cat className="w-8 h-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl">Clínica Felina</CardTitle>
-            <CardDescription>Ingresa tus credenciales para acceder</CardDescription>
+            <CardTitle className="">Cats</CardTitle>
+            <CardTitle className="text-2xl">Centro Clínico Felino</CardTitle>
+            <CardDescription>
+              Ingresa tus credenciales para acceder
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin}>
@@ -76,9 +88,17 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
-                {error && <p className="text-sm text-destructive bg-destructive/10 p-2 rounded">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Ingresando..." : "Ingresar"}
+                {error && (
+                  <p className="text-sm text-destructive bg-destructive/10 p-2 rounded">
+                    {error}
+                  </p>
+                )}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Ingresando...' : 'Ingresar'}
                 </Button>
               </div>
             </form>
