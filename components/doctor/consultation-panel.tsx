@@ -180,11 +180,21 @@ export function ConsultationPanel({ patient, appointment, doctorId, onEndConsult
       {/* Pet Header */}
       <div className="bg-card border border-border rounded-xl p-4 mb-4">
         <div className="flex items-center gap-4">
-          <img
-            src={patient.image_url || "/placeholder.svg?height=80&width=80&query=cat"}
-            alt={patient.name}
-            className="w-20 h-20 rounded-xl object-cover bg-muted"
-          />
+          <picture>
+            <source
+              srcSet={patient.image_url || "/placeholder.svg?height=80&width=80&query=cat"}
+              type="image/webp"
+            />
+            <source
+              srcSet={patient.image_url || "/placeholder.svg?height=80&width=80&query=cat"}
+              type="image/jpeg"
+            />
+            <img
+              src={patient.image_url || "/placeholder.svg?height=80&width=80&query=cat"}
+              alt={patient.name}
+              className="w-20 h-20 rounded-xl object-cover bg-muted"
+            />
+          </picture>
           <div className="flex-1">
             <h2 className="text-xl font-bold text-foreground">{patient.name}</h2>
             <p className="text-sm text-muted-foreground">

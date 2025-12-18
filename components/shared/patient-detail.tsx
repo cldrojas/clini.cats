@@ -151,11 +151,21 @@ export function PatientDetail({ patient, role, onBack, onUpdate }: PatientDetail
       {/* Patient Profile */}
       <div className="bg-card border border-border rounded-2xl p-4 mb-4">
         <div className="flex items-start gap-4">
-          <img
-            src={patient.image_url || "/placeholder.svg?height=80&width=80&query=cat face"}
-            alt={patient.name}
-            className="w-20 h-20 rounded-2xl object-cover bg-muted"
-          />
+          <picture>
+            <source
+              srcSet={patient.image_url || "/placeholder.svg?height=80&width=80&query=cat face"}
+              type="image/webp"
+            />
+            <source
+              srcSet={patient.image_url || "/placeholder.svg?height=80&width=80&query=cat face"}
+              type="image/jpeg"
+            />
+            <img
+              src={patient.image_url || "/placeholder.svg?height=80&width=80&query=cat face"}
+              alt={patient.name}
+              className="w-20 h-20 rounded-2xl object-cover bg-muted"
+            />
+          </picture>
           <div className="flex-1">
             {editingPatient && canEdit ? (
               <div className="space-y-2">

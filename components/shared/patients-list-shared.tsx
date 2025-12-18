@@ -61,11 +61,21 @@ export function PatientsListShared({ patients, role, onUpdate }: PatientsListSha
               onClick={() => setSelectedPatient(patient)}
               className="w-full bg-card border border-border rounded-xl p-4 flex items-center gap-3 hover:border-primary/50 hover:bg-accent/50 transition-colors text-left"
             >
-              <img
-                src={patient.image_url || "/placeholder.svg?height=48&width=48&query=cat"}
-                alt={patient.name}
-                className="w-12 h-12 rounded-xl object-cover bg-muted"
-              />
+              <picture>
+                <source
+                  srcSet={patient.image_url || "/placeholder.svg?height=48&width=48&query=cat"}
+                  type="image/webp"
+                />
+                <source
+                  srcSet={patient.image_url || "/placeholder.svg?height=48&width=48&query=cat"}
+                  type="image/jpeg"
+                />
+                <img
+                  src={patient.image_url || "/placeholder.svg?height=48&width=48&query=cat"}
+                  alt={patient.name}
+                  className="w-12 h-12 rounded-xl object-cover bg-muted"
+                />
+              </picture>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-foreground">{patient.name}</h3>
                 <p className="text-sm text-muted-foreground truncate">

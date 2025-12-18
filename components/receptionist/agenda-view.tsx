@@ -278,11 +278,21 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
           appointments.map((apt) => (
             <div key={apt.id} className="bg-card border border-border rounded-xl p-4">
               <div className="flex items-center gap-3">
-                <img
-                  src={apt.patient?.image_url || "/placeholder.svg?height=48&width=48&query=cat"}
-                  alt={apt.patient?.name}
-                  className="w-12 h-12 rounded-xl object-cover bg-muted"
-                />
+                <picture>
+                  <source
+                    srcSet={apt.patient?.image_url || "/placeholder.svg?height=48&width=48&query=cat"}
+                    type="image/webp"
+                  />
+                  <source
+                    srcSet={apt.patient?.image_url || "/placeholder.svg?height=48&width=48&query=cat"}
+                    type="image/jpeg"
+                  />
+                  <img
+                    src={apt.patient?.image_url || "/placeholder.svg?height=48&width=48&query=cat"}
+                    alt={apt.patient?.name}
+                    className="w-12 h-12 rounded-xl object-cover bg-muted"
+                  />
+                </picture>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-foreground truncate">{apt.patient?.name}</h3>

@@ -44,11 +44,21 @@ export function WaitingRoomCheckin({ appointments, onUpdate }: WaitingRoomChecki
                 onClick={() => handleCheckin(apt.id)}
                 className="bg-card border border-border rounded-xl p-4 text-left hover:border-primary hover:shadow-md transition-all group"
               >
-                <img
-                  src={apt.patient?.image_url || "/placeholder.svg?height=64&width=64&query=cat"}
-                  alt={apt.patient?.name}
-                  className="w-16 h-16 rounded-xl object-cover bg-muted mx-auto mb-3"
-                />
+                <picture>
+                  <source
+                    srcSet={apt.patient?.image_url || "/placeholder.svg?height=64&width=64&query=cat"}
+                    type="image/webp"
+                  />
+                  <source
+                    srcSet={apt.patient?.image_url || "/placeholder.svg?height=64&width=64&query=cat"}
+                    type="image/jpeg"
+                  />
+                  <img
+                    src={apt.patient?.image_url || "/placeholder.svg?height=64&width=64&query=cat"}
+                    alt={apt.patient?.name}
+                    className="w-16 h-16 rounded-xl object-cover bg-muted mx-auto mb-3"
+                  />
+                </picture>
                 <h4 className="font-semibold text-foreground text-center group-hover:text-primary transition-colors">
                   {apt.patient?.name}
                 </h4>
@@ -81,11 +91,21 @@ export function WaitingRoomCheckin({ appointments, onUpdate }: WaitingRoomChecki
                 key={apt.id}
                 className="bg-warning/10 border border-warning/30 rounded-xl p-3 flex items-center gap-3"
               >
-                <img
-                  src={apt.patient?.image_url || "/placeholder.svg?height=40&width=40&query=cat"}
-                  alt={apt.patient?.name}
-                  className="w-10 h-10 rounded-lg object-cover"
-                />
+                <picture>
+                  <source
+                    srcSet={apt.patient?.image_url || "/placeholder.svg?height=40&width=40&query=cat"}
+                    type="image/webp"
+                  />
+                  <source
+                    srcSet={apt.patient?.image_url || "/placeholder.svg?height=40&width=40&query=cat"}
+                    type="image/jpeg"
+                  />
+                  <img
+                    src={apt.patient?.image_url || "/placeholder.svg?height=40&width=40&query=cat"}
+                    alt={apt.patient?.name}
+                    className="w-10 h-10 rounded-lg object-cover"
+                  />
+                </picture>
                 <div className="flex-1">
                   <h4 className="font-medium text-foreground">{apt.patient?.name}</h4>
                   <p className="text-xs text-muted-foreground">Llegó a las {apt.time?.slice(0, 5)}</p>

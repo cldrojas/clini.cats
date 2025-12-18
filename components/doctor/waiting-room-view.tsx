@@ -31,11 +31,21 @@ export function WaitingRoomView({ waitingPatients, onStartConsultation }: Waitin
                 <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center text-warning font-bold text-sm">
                   {index + 1}
                 </div>
-                <img
-                  src={apt.patient?.image_url || "/placeholder.svg?height=56&width=56&query=cat"}
-                  alt={apt.patient?.name}
-                  className="w-14 h-14 rounded-xl object-cover bg-muted"
-                />
+                <picture>
+                  <source
+                    srcSet={apt.patient?.image_url || "/placeholder.svg?height=56&width=56&query=cat"}
+                    type="image/webp"
+                  />
+                  <source
+                    srcSet={apt.patient?.image_url || "/placeholder.svg?height=56&width=56&query=cat"}
+                    type="image/jpeg"
+                  />
+                  <img
+                    src={apt.patient?.image_url || "/placeholder.svg?height=56&width=56&query=cat"}
+                    alt={apt.patient?.name}
+                    className="w-14 h-14 rounded-xl object-cover bg-muted"
+                  />
+                </picture>
                 <div className="flex-1 text-left">
                   <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                     {apt.patient?.name}

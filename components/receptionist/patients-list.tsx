@@ -33,11 +33,21 @@ export function PatientsList() {
       <div className="space-y-2">
         {filteredPets.map((pet) => (
           <div key={pet.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-            <img
-              src={pet.photo || "/placeholder.svg"}
-              alt={pet.name}
-              className="w-12 h-12 rounded-xl object-cover bg-muted"
-            />
+            <picture>
+              <source
+                srcSet={pet.photo || "/placeholder.svg"}
+                type="image/webp"
+              />
+              <source
+                srcSet={pet.photo || "/placeholder.svg"}
+                type="image/jpeg"
+              />
+              <img
+                src={pet.photo || "/placeholder.svg"}
+                alt={pet.name}
+                className="w-12 h-12 rounded-xl object-cover bg-muted"
+              />
+            </picture>
             <div className="flex-1">
               <h3 className="font-semibold text-foreground">{pet.name}</h3>
               <p className="text-sm text-muted-foreground">

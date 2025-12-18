@@ -1,13 +1,23 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Save, Plus, Trash2, Weight, Syringe, FileText, Edit2, Check, X } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import type { Patient, MedicalRecord } from "@/lib/types"
-import useSWR from "swr"
+import { useState } from 'react'
+import {
+  Save,
+  Plus,
+  Trash2,
+  Weight,
+  Syringe,
+  FileText,
+  Edit2,
+  Check,
+  X
+} from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import type { Patient, MedicalRecord } from '@/lib/types'
+import useSWR from 'swr'
 
 interface PetDataEditorProps {
   patient: Patient
@@ -17,24 +27,25 @@ interface PetDataEditorProps {
 const fetchMedicalHistory = async (patientId: string) => {
   const supabase = createClient()
   const { data } = await supabase
-    .from("medical_records")
-    .select("*")
-    .eq("patient_id", patientId)
-    .order("date", { ascending: false })
+    .from('medical_records')
+    .select('*')
+    .eq('patient_id', patientId)
+    .order('date', { ascending: false })
   return data || []
 }
 
 export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
-  const [newWeight, setNewWeight] = useState("")
-  const [newVaccine, setNewVaccine] = useState("")
-  const [newNote, setNewNote] = useState("")
+  const [newWeight, setNewWeight] = useState('')
+  const [newVaccine, setNewVaccine] = useState('')
+  const [newNote, setNewNote] = useState('')
   const [editingRecord, setEditingRecord] = useState<string | null>(null)
-  const [editDiagnosis, setEditDiagnosis] = useState("")
-  const [editTreatment, setEditTreatment] = useState("")
+  const [editDiagnosis, setEditDiagnosis] = useState('')
+  const [editTreatment, setEditTreatment] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const { data: history = [], mutate: mutateHistory } = useSWR<MedicalRecord[]>(`history-${patient.id}`, () =>
-    fetchMedicalHistory(patient.id),
+  const { data: history = [], mutate: mutateHistory } = useSWR<MedicalRecord[]>(
+    `history-${patient.id}`,
+    () => fetchMedicalHistory(patient.id)
   )
 
   const handleUpdateWeight = async () => {
@@ -42,10 +53,10 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
     setIsLoading(true)
     const supabase = createClient()
     await supabase
-      .from("patients")
+      .from('patients')
       .update({ weight: Number.parseFloat(newWeight) })
-      .eq("id", patient.id)
-    setNewWeight("")
+      .eq('id', patient.id)
+    setNewWeight('')
     onUpdate()
     setIsLoading(false)
   }
@@ -55,8 +66,11 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
     setIsLoading(true)
     const supabase = createClient()
     const updatedVaccines = [...(patient.vaccines || []), newVaccine.trim()]
-    await supabase.from("patients").update({ vaccines: updatedVaccines }).eq("id", patient.id)
-    setNewVaccine("")
+    await supabase
+      .from('patients')
+      .update({ vaccines: updatedVaccines })
+      .eq('id', patient.id)
+    setNewVaccine('')
     onUpdate()
     setIsLoading(false)
   }
@@ -64,8 +78,12 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
   const handleRemoveVaccine = async (index: number) => {
     setIsLoading(true)
     const supabase = createClient()
-    const updatedVaccines = patient.vaccines?.filter((_, i) => i !== index) || []
-    await supabase.from("patients").update({ vaccines: updatedVaccines }).eq("id", patient.id)
+    const updatedVaccines =
+      patient.vaccines?.filter((_, i) => i !== index) || []
+    await supabase
+      .from('patients')
+      .update({ vaccines: updatedVaccines })
+      .eq('id', patient.id)
     onUpdate()
     setIsLoading(false)
   }
@@ -74,29 +92,34 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
     if (!newNote.trim()) return
     setIsLoading(true)
     const supabase = createClient()
-    const updatedNotes = patient.notes ? `${patient.notes}\n${newNote.trim()}` : newNote.trim()
-    await supabase.from("patients").update({ notes: updatedNotes }).eq("id", patient.id)
-    setNewNote("")
+    const updatedNotes = patient.notes
+      ? `${patient.notes}\n${newNote.trim()}`
+      : newNote.trim()
+    await supabase
+      .from('patients')
+      .update({ notes: updatedNotes })
+      .eq('id', patient.id)
+    setNewNote('')
     onUpdate()
     setIsLoading(false)
   }
 
   const startEditRecord = (record: MedicalRecord) => {
     setEditingRecord(record.id)
-    setEditDiagnosis(record.diagnosis || "")
-    setEditTreatment(record.treatment || "")
+    setEditDiagnosis(record.diagnosis || '')
+    setEditTreatment(record.treatment || '')
   }
 
   const handleSaveRecord = async (recordId: string) => {
     setIsLoading(true)
     const supabase = createClient()
     await supabase
-      .from("medical_records")
+      .from('medical_records')
       .update({
         diagnosis: editDiagnosis || null,
-        treatment: editTreatment || null,
+        treatment: editTreatment || null
       })
-      .eq("id", recordId)
+      .eq('id', recordId)
     setEditingRecord(null)
     mutateHistory()
     setIsLoading(false)
@@ -107,13 +130,28 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
       {/* Pet Header */}
       <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 mb-6">
         <div className="flex items-center gap-4">
-          <img
-            src={patient.image_url || "/placeholder.svg?height=64&width=64&query=cat"}
-            alt={patient.name}
-            className="w-16 h-16 rounded-xl object-cover"
-          />
+          <picture>
+            <source
+              srcSet={patient.image_url}
+              type="image/webp"
+            />
+            <source
+              srcSet={patient.image_url}
+              type="image/jpeg"
+            />
+            <img
+              src={
+                patient.image_url ||
+                '/placeholder.svg?height=64&width=64&query=cat'
+              }
+              alt={patient.name}
+              className="w-16 h-16 rounded-xl object-cover"
+            />
+          </picture>
           <div>
-            <h2 className="text-lg font-bold text-foreground">{patient.name}</h2>
+            <h2 className="text-lg font-bold text-foreground">
+              {patient.name}
+            </h2>
             <p className="text-sm text-muted-foreground">
               {patient.breed} • {patient.age}
             </p>
@@ -131,7 +169,7 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
           <h3 className="font-semibold text-foreground">Peso</h3>
         </div>
         <p className="text-2xl font-bold text-foreground mb-3">
-          {patient.weight ? `${patient.weight} kg` : "No registrado"}
+          {patient.weight ? `${patient.weight} kg` : 'No registrado'}
         </p>
         <div className="flex gap-2">
           <Input
@@ -141,7 +179,10 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
             value={newWeight}
             onChange={(e) => setNewWeight(e.target.value)}
           />
-          <Button onClick={handleUpdateWeight} disabled={!newWeight.trim() || isLoading}>
+          <Button
+            onClick={handleUpdateWeight}
+            disabled={!newWeight.trim() || isLoading}
+          >
             <Save className="w-4 h-4" />
           </Button>
         </div>
@@ -156,7 +197,10 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
         <div className="space-y-2 mb-3">
           {patient.vaccines && patient.vaccines.length > 0 ? (
             patient.vaccines.map((v, i) => (
-              <div key={i} className="flex items-center justify-between bg-success/10 p-2 rounded-lg">
+              <div
+                key={i}
+                className="flex items-center justify-between bg-success/10 p-2 rounded-lg"
+              >
                 <span className="text-sm text-foreground">{v}</span>
                 <button
                   onClick={() => handleRemoveVaccine(i)}
@@ -168,12 +212,21 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
               </div>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground">Sin vacunas registradas</p>
+            <p className="text-sm text-muted-foreground">
+              Sin vacunas registradas
+            </p>
           )}
         </div>
         <div className="flex gap-2">
-          <Input placeholder="Nueva vacuna..." value={newVaccine} onChange={(e) => setNewVaccine(e.target.value)} />
-          <Button onClick={handleAddVaccine} disabled={!newVaccine.trim() || isLoading}>
+          <Input
+            placeholder="Nueva vacuna..."
+            value={newVaccine}
+            onChange={(e) => setNewVaccine(e.target.value)}
+          />
+          <Button
+            onClick={handleAddVaccine}
+            disabled={!newVaccine.trim() || isLoading}
+          >
             <Plus className="w-4 h-4" />
           </Button>
         </div>
@@ -187,12 +240,21 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
         </div>
         {patient.notes && (
           <div className="bg-warning/10 p-3 rounded-lg mb-3">
-            <p className="text-sm text-foreground whitespace-pre-line">{patient.notes}</p>
+            <p className="text-sm text-foreground whitespace-pre-line">
+              {patient.notes}
+            </p>
           </div>
         )}
         <div className="flex gap-2">
-          <Input placeholder="Nueva nota..." value={newNote} onChange={(e) => setNewNote(e.target.value)} />
-          <Button onClick={handleAddNote} disabled={!newNote.trim() || isLoading}>
+          <Input
+            placeholder="Nueva nota..."
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+          />
+          <Button
+            onClick={handleAddNote}
+            disabled={!newNote.trim() || isLoading}
+          >
             <Plus className="w-4 h-4" />
           </Button>
         </div>
@@ -202,21 +264,32 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
       <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <Edit2 className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold text-foreground">Consultas Anteriores</h3>
+          <h3 className="font-semibold text-foreground">
+            Consultas Anteriores
+          </h3>
         </div>
 
         {history.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">Sin consultas registradas</p>
+          <p className="text-sm text-muted-foreground text-center py-4">
+            Sin consultas registradas
+          </p>
         ) : (
           <div className="space-y-3">
             {history.map((record) => (
-              <div key={record.id} className="border border-border rounded-lg p-3">
+              <div
+                key={record.id}
+                className="border border-border rounded-lg p-3"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-foreground">
-                    {new Date(record.date).toLocaleDateString("es-CO")}
+                    {new Date(record.date).toLocaleDateString('es-CO')}
                   </span>
                   {editingRecord !== record.id && (
-                    <Button variant="ghost" size="sm" onClick={() => startEditRecord(record)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => startEditRecord(record)}
+                    >
                       <Edit2 className="w-4 h-4" />
                     </Button>
                   )}
@@ -225,7 +298,9 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
                 {editingRecord === record.id ? (
                   <div className="space-y-2">
                     <div>
-                      <label className="text-xs text-muted-foreground">Diagnóstico</label>
+                      <label className="text-xs text-muted-foreground">
+                        Diagnóstico
+                      </label>
                       <Input
                         value={editDiagnosis}
                         onChange={(e) => setEditDiagnosis(e.target.value)}
@@ -233,7 +308,9 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-muted-foreground">Tratamiento</label>
+                      <label className="text-xs text-muted-foreground">
+                        Tratamiento
+                      </label>
                       <Textarea
                         value={editTreatment}
                         onChange={(e) => setEditTreatment(e.target.value)}
@@ -242,10 +319,18 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
                       />
                     </div>
                     <div className="flex gap-2 justify-end">
-                      <Button variant="ghost" size="sm" onClick={() => setEditingRecord(null)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingRecord(null)}
+                      >
                         <X className="w-4 h-4" />
                       </Button>
-                      <Button size="sm" onClick={() => handleSaveRecord(record.id)} disabled={isLoading}>
+                      <Button
+                        size="sm"
+                        onClick={() => handleSaveRecord(record.id)}
+                        disabled={isLoading}
+                      >
                         <Check className="w-4 h-4 mr-1" />
                         Guardar
                       </Button>
@@ -264,7 +349,9 @@ export function PetDataEditor({ patient, onUpdate }: PetDataEditorProps) {
                       </p>
                     )}
                     {!record.diagnosis && !record.treatment && (
-                      <p className="text-sm text-muted-foreground italic">Sin diagnóstico ni tratamiento registrado</p>
+                      <p className="text-sm text-muted-foreground italic">
+                        Sin diagnóstico ni tratamiento registrado
+                      </p>
                     )}
                   </>
                 )}
