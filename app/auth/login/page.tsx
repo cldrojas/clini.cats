@@ -25,7 +25,6 @@ export default function LoginPage() {
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
-    console.log(`function handleLogin`)
     e.preventDefault()
     const supabase = createClient()
     setIsLoading(true)
@@ -39,11 +38,10 @@ export default function LoginPage() {
 
       if (authError) throw authError
 
-      console.log(`DEBUG:redirecting to dashboard:`)
-      // Redirect to dashboard - server will handle role-based routing
-      router.push('/dashboard')
+      // Redirect to main page - server will handle role-based routing
+      router.push('/')
     } catch (err: unknown) {
-      console.log(`DEBUG:err:`, err)
+      console.error(`DEBUG:err:`, err)
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
     } finally {
       setIsLoading(false)
