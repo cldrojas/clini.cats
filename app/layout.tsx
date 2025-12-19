@@ -1,7 +1,11 @@
-import type React from 'react'
+import { Inter } from 'next/font/google'
 import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
+
+const inter = Inter({
+  subsets: ['latin']
+})
 
 export const metadata: Metadata = {
   title: 'Clínica Felina - Sistema de Gestión',
@@ -34,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`font-sans antialiased`}>
+      <body className={inter.className}>
         {children}
         <Analytics />
       </body>
