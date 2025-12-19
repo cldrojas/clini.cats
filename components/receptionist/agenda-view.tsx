@@ -1,14 +1,26 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Plus, Phone, MessageCircle, Clock, ChevronRight } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { Appointment, Patient } from "@/lib/types"
+import { useState } from 'react'
+import { Plus, Phone, MessageCircle, Clock, ChevronRight } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import type { Appointment, Patient } from '@/lib/types'
 
 interface AgendaViewProps {
   appointments: Appointment[]
@@ -18,27 +30,32 @@ interface AgendaViewProps {
 export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isNewPet, setIsNewPet] = useState(false)
-  const [selectedPatientId, setSelectedPatientId] = useState("")
+  const [selectedPatientId, setSelectedPatientId] = useState('')
   const [patients, setPatients] = useState<Patient[]>([])
   const [newPatientData, setNewPatientData] = useState({
-    name: "",
-    breed: "",
-    age: "",
-    ownerName: "",
-    ownerPhone: "",
-    ownerEmail: "",
+    name: '',
+    breed: '',
+    age: '',
+    ownerName: '',
+    ownerPhone: '',
+    ownerEmail: '',
+    ownerAddress: ''
   })
   const [appointmentData, setAppointmentData] = useState({
-    time: "",
-    reason: "",
+    time: '',
+    date: '',
+    reason: ''
   })
   const [isLoading, setIsLoading] = useState(false)
 
-  const today = new Date().toISOString().split("T")[0]
+  const today = new Date().toISOString().split('T')[0]
 
   const loadPatients = async () => {
     const supabase = createClient()
-    const { data } = await supabase.from("patients").select("*, owner:owners(*)").order("name")
+    const { data } = await supabase
+      .from('patients')
+      .select('*, owner:owners(*)')
+      .order('name')
     setPatients(data || [])
   }
 
@@ -57,11 +74,11 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
       if (isNewPet) {
         // Create owner first
         const { data: owner, error: ownerError } = await supabase
-          .from("owners")
+          .from('owners')
           .insert({
             name: newPatientData.ownerName,
             phone: newPatientData.ownerPhone,
-            email: newPatientData.ownerEmail || null,
+            email: newPatientData.ownerEmail || null
           })
           .select()
           .single()
@@ -70,13 +87,13 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
 
         // Create patient
         const { data: patient, error: patientError } = await supabase
-          .from("patients")
+          .from('patients')
           .insert({
             name: newPatientData.name,
             breed: newPatientData.breed,
             age: newPatientData.age,
             owner_id: owner.id,
-            vaccines: [],
+            vaccines: []
           })
           .select()
           .single()
@@ -86,19 +103,19 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
       }
 
       // Create appointment
-      await supabase.from("appointments").insert({
+      await supabase.from('appointments').insert({
         patient_id: patientId,
-        date: today,
+        date: appointmentData.date || today,
         time: appointmentData.time,
         reason: appointmentData.reason,
-        status: "scheduled",
+        status: 'scheduled'
       })
 
       onUpdate()
       setIsOpen(false)
       resetForm()
     } catch (error) {
-      console.error("Error creating appointment:", error)
+      console.error('Error creating appointment:', error)
     } finally {
       setIsLoading(false)
     }
@@ -106,40 +123,67 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
 
   const resetForm = () => {
     setIsNewPet(false)
-    setSelectedPatientId("")
-    setNewPatientData({ name: "", breed: "", age: "", ownerName: "", ownerPhone: "", ownerEmail: "" })
-    setAppointmentData({ time: "", reason: "" })
+    setSelectedPatientId('')
+    setNewPatientData({
+      name: '',
+      breed: '',
+      age: '',
+      ownerName: '',
+      ownerPhone: '',
+      ownerEmail: '',
+      ownerAddress: ''
+    })
+    setAppointmentData({ time: '', reason: '', date: '' })
   }
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      scheduled: "bg-muted text-muted-foreground",
-      waiting: "bg-warning/20 text-warning",
-      in_consultation: "bg-primary/20 text-primary",
-      completed: "bg-success/20 text-success",
+      scheduled: 'bg-muted text-muted-foreground',
+      waiting: 'bg-warning/20 text-warning',
+      in_consultation: 'bg-primary/20 text-primary',
+      completed: 'bg-success/20 text-success'
     }
     const labels: Record<string, string> = {
-      scheduled: "Agendada",
-      waiting: "En espera",
-      in_consultation: "En consulta",
-      completed: "Completada",
+      scheduled: 'Agendada',
+      waiting: 'En espera',
+      in_consultation: 'En consulta',
+      completed: 'Completada'
     }
-    return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[status]}`}>{labels[status]}</span>
+    return (
+      <span
+        className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[status]}`}
+      >
+        {labels[status]}
+      </span>
+    )
   }
 
   return (
     <div className="p-4 pb-24">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Agenda de Hoy</h2>
+          <h2 className="text-lg font-semibold text-foreground">
+            Agenda de Hoy
+          </h2>
           <p className="text-sm text-muted-foreground">
-            {new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
+            {new Date().toLocaleDateString('es-ES', {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long'
+            })}
           </p>
         </div>
 
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog
+          open={isOpen}
+          onOpenChange={setIsOpen}
+        >
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={handleOpenDialog}>
+            <Button
+              size="sm"
+              className="bg-primary hover:bg-primary/90"
+              onClick={handleOpenDialog}
+            >
               <Plus className="w-4 h-4 mr-1" />
               Nueva Cita
             </Button>
@@ -152,7 +196,7 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
             <div className="space-y-4 mt-4">
               <div className="flex gap-2">
                 <Button
-                  variant={!isNewPet ? "default" : "outline"}
+                  variant={!isNewPet ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setIsNewPet(false)}
                   className="flex-1"
@@ -160,7 +204,7 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
                   Existente
                 </Button>
                 <Button
-                  variant={isNewPet ? "default" : "outline"}
+                  variant={isNewPet ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setIsNewPet(true)}
                   className="flex-1"
@@ -172,13 +216,19 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
               {!isNewPet ? (
                 <div>
                   <Label>Seleccionar Paciente</Label>
-                  <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
+                  <Select
+                    value={selectedPatientId}
+                    onValueChange={setSelectedPatientId}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Buscar mascota..." />
                     </SelectTrigger>
                     <SelectContent>
                       {patients.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
+                        <SelectItem
+                          key={p.id}
+                          value={p.id}
+                        >
                           {p.name} - {p.owner?.name}
                         </SelectItem>
                       ))}
@@ -192,14 +242,24 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
                       <Label>Nombre Mascota</Label>
                       <Input
                         value={newPatientData.name}
-                        onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
+                        onChange={(e) =>
+                          setNewPatientData({
+                            ...newPatientData,
+                            name: e.target.value
+                          })
+                        }
                       />
                     </div>
                     <div>
                       <Label>Raza</Label>
                       <Input
                         value={newPatientData.breed}
-                        onChange={(e) => setNewPatientData({ ...newPatientData, breed: e.target.value })}
+                        onChange={(e) =>
+                          setNewPatientData({
+                            ...newPatientData,
+                            breed: e.target.value
+                          })
+                        }
                       />
                     </div>
                   </div>
@@ -207,7 +267,12 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
                     <Label>Edad</Label>
                     <Input
                       value={newPatientData.age}
-                      onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
+                      onChange={(e) =>
+                        setNewPatientData({
+                          ...newPatientData,
+                          age: e.target.value
+                        })
+                      }
                       placeholder="2 años"
                     />
                   </div>
@@ -215,14 +280,48 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
                     <Label>Nombre Dueño</Label>
                     <Input
                       value={newPatientData.ownerName}
-                      onChange={(e) => setNewPatientData({ ...newPatientData, ownerName: e.target.value })}
+                      onChange={(e) =>
+                        setNewPatientData({
+                          ...newPatientData,
+                          ownerName: e.target.value
+                        })
+                      }
                     />
                   </div>
                   <div>
                     <Label>Teléfono</Label>
                     <Input
                       value={newPatientData.ownerPhone}
-                      onChange={(e) => setNewPatientData({ ...newPatientData, ownerPhone: e.target.value })}
+                      onChange={(e) =>
+                        setNewPatientData({
+                          ...newPatientData,
+                          ownerPhone: e.target.value
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label>Correo</Label>
+                    <Input
+                      value={newPatientData.ownerEmail}
+                      onChange={(e) =>
+                        setNewPatientData({
+                          ...newPatientData,
+                          ownerEmail: e.target.value
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label>Dirección</Label>
+                    <Input
+                      value={newPatientData.ownerAddress}
+                      onChange={(e) =>
+                        setNewPatientData({
+                          ...newPatientData,
+                          ownerAddress: e.target.value
+                        })
+                      }
                     />
                   </div>
                 </>
@@ -230,21 +329,45 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
+                  <Label>Fecha</Label>
+                  <Input
+                    type="date"
+                    value={appointmentData.date}
+                    onChange={(e) =>
+                      setAppointmentData({
+                        ...appointmentData,
+                        date: e.target.value
+                      })
+                    }
+                  />
+                </div>
+                <div>
                   <Label>Hora</Label>
                   <Input
                     type="time"
                     value={appointmentData.time}
-                    onChange={(e) => setAppointmentData({ ...appointmentData, time: e.target.value })}
+                    onChange={(e) =>
+                      setAppointmentData({
+                        ...appointmentData,
+                        time: e.target.value
+                      })
+                    }
                   />
                 </div>
-                <div>
-                  <Label>Motivo</Label>
-                  <Input
-                    value={appointmentData.reason}
-                    onChange={(e) => setAppointmentData({ ...appointmentData, reason: e.target.value })}
-                    placeholder="Control"
-                  />
-                </div>
+              </div>
+              <div>
+                <Label>Motivo</Label>
+                <Input
+                  className="w-full"
+                  value={appointmentData.reason}
+                  onChange={(e) =>
+                    setAppointmentData({
+                      ...appointmentData,
+                      reason: e.target.value
+                    })
+                  }
+                  placeholder="Control"
+                />
               </div>
 
               <Button
@@ -254,10 +377,11 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
                   isLoading ||
                   (!isNewPet && !selectedPatientId) ||
                   (isNewPet && !newPatientData.name) ||
-                  !appointmentData.time
+                  !appointmentData.time ||
+                  !appointmentData.reason
                 }
               >
-                {isLoading ? "Creando..." : "Confirmar Cita"}
+                {isLoading ? 'Creando...' : 'Confirmar Cita'}
               </Button>
             </div>
           </DialogContent>
@@ -273,32 +397,50 @@ export function AgendaView({ appointments, onUpdate }: AgendaViewProps) {
 
       <div className="space-y-3">
         {appointments.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">No hay citas agendadas para hoy</div>
+          <div className="text-center py-12 text-muted-foreground">
+            No hay citas agendadas para hoy
+          </div>
         ) : (
           appointments.map((apt) => (
-            <div key={apt.id} className="bg-card border border-border rounded-xl p-4">
+            <div
+              key={apt.id}
+              className="bg-card border border-border rounded-xl p-4"
+            >
               <div className="flex items-center gap-3">
                 <picture>
                   <source
-                    srcSet={apt.patient?.image_url || "/placeholder.svg?height=48&width=48&query=cat"}
+                    srcSet={
+                      apt.patient?.image_url ||
+                      '/placeholder.svg?height=48&width=48&query=cat'
+                    }
                     type="image/webp"
                   />
                   <source
-                    srcSet={apt.patient?.image_url || "/placeholder.svg?height=48&width=48&query=cat"}
+                    srcSet={
+                      apt.patient?.image_url ||
+                      '/placeholder.svg?height=48&width=48&query=cat'
+                    }
                     type="image/jpeg"
                   />
                   <img
-                    src={apt.patient?.image_url || "/placeholder.svg?height=48&width=48&query=cat"}
+                    src={
+                      apt.patient?.image_url ||
+                      '/placeholder.svg?height=48&width=48&query=cat'
+                    }
                     alt={apt.patient?.name}
                     className="w-12 h-12 rounded-xl object-cover bg-muted"
                   />
                 </picture>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-foreground truncate">{apt.patient?.name}</h3>
+                    <h3 className="font-semibold text-foreground truncate">
+                      {apt.patient?.name}
+                    </h3>
                     {getStatusBadge(apt.status)}
                   </div>
-                  <p className="text-sm text-muted-foreground truncate">{apt.patient?.owner?.name}</p>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {apt.patient?.owner?.name}
+                  </p>
                 </div>
                 <div className="text-right">
                   <div className="flex items-center gap-1 text-primary font-medium">
