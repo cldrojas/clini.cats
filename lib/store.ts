@@ -4,15 +4,14 @@ import useSWR, { mutate } from 'swr'
 export interface Pet {
   id: string
   name: string
-  species: 'cat'
   breed: string
   age: string
-  weight: string
-  ownerName: string
-  ownerPhone: string
-  photo: string
+  weight: number
+  color: string
+  owner_id: string
   vaccines: string[]
-  medicalNotes: string[]
+  notes: string[]
+  image_url: string
 }
 
 export interface MedicalRecord {
@@ -21,7 +20,7 @@ export interface MedicalRecord {
   reason: string
   notes: string[]
   voiceNotes: string[]
-  weight: string
+  weight: number
   diagnosis?: string
   treatment?: string
 }
@@ -41,67 +40,65 @@ export interface Appointment {
 }
 
 // Mock data
-const mockPets: Pet[] = [
+export const mockPets: Pet[] = [
   {
-    id: '1',
+    id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
     name: 'Michi',
-    species: 'cat',
     breed: 'Persa',
     age: '3 años',
-    weight: '4.2 kg',
-    ownerName: 'María García',
-    ownerPhone: '+57 300 123 4567',
-    photo: '/persian-cat-face.jpg',
+    weight: 4.2,
+    color: 'Gris',
+    owner_id: '1391428a-43c5-4fc7-b8b1-728beca27636',
     vaccines: ['Triple felina', 'Rabia'],
-    medicalNotes: ['Alergia leve a pollo']
+    notes: ['Alergia leve a pollo'],
+    image_url: '/persian-cat-face.jpg'
   },
   {
-    id: '2',
+    id: 'b2c3d4e5-f678-9012-bcde-f23456789012',
     name: 'Luna',
-    species: 'cat',
     breed: 'Siamés',
     age: '5 años',
-    weight: '3.8 kg',
-    ownerName: 'Carlos Rodríguez',
-    ownerPhone: '+57 310 987 6543',
-    photo: '/siamese-cat-face.jpg',
+    weight: 3.8,
+    color: 'Crema',
+    owner_id: '1391428a-43c5-4fc7-b8b1-728beca27636',
     vaccines: ['Triple felina', 'Rabia', 'Leucemia'],
-    medicalNotes: []
+    notes: [],
+    image_url: '/siamese-cat-face.jpg'
   },
   {
-    id: '3',
+    id: 'c3d4e5f6-7890-1234-cdef-345678901234',
     name: 'Simba',
-    species: 'cat',
     breed: 'Naranja Común',
     age: '2 años',
-    weight: '5.1 kg',
-    ownerName: 'Ana Martínez',
-    ownerPhone: '+57 320 456 7890',
-    photo: '/orange-tabby-cat-face.jpg',
+    weight: 5.1,
+    color: 'Naranja',
+    owner_id: '1391428a-43c5-4fc7-b8b1-728beca27636',
     vaccines: ['Triple felina'],
-    medicalNotes: ['Tendencia a obesidad']
+    notes: ['Tendencia a obesidad'],
+    image_url: '/orange-tabby-cat-face.jpg'
   },
   {
-    id: '4',
+    id: 'd4e5f678-9012-3456-def0-456789012345',
     name: 'Nala',
-    species: 'cat',
     breed: 'Maine Coon',
     age: '4 años',
-    weight: '6.5 kg',
-    ownerName: 'Pedro Sánchez',
-    ownerPhone: '+57 315 111 2222',
-    photo: '/maine-coon-cat-face.jpg',
+    weight: 6.5,
+    color: 'Marrón',
+    owner_id: '1391428a-43c5-4fc7-b8b1-728beca27636',
     vaccines: ['Triple felina', 'Rabia'],
-    medicalNotes: ['Revisión dental pendiente']
+    notes: ['Revisión dental pendiente'],
+    image_url: '/maine-coon-cat-face.jpg'
   }
 ]
+
+export const seedAppointmentTypes = ['Control', 'Emergencia']
 
 const today = new Date().toISOString().split('T')[0]
 
 const mockAppointments: Appointment[] = [
   {
     id: 'a1',
-    petId: '1',
+    petId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
     pet: mockPets[0],
     date: today,
     time: '09:00',
@@ -112,7 +109,7 @@ const mockAppointments: Appointment[] = [
   },
   {
     id: 'a2',
-    petId: '2',
+    petId: 'b2c3d4e5-f678-9012-bcde-f23456789012',
     pet: mockPets[1],
     date: today,
     time: '09:30',
@@ -123,7 +120,7 @@ const mockAppointments: Appointment[] = [
   },
   {
     id: 'a3',
-    petId: '3',
+    petId: 'c3d4e5f6-7890-1234-cdef-345678901234',
     pet: mockPets[2],
     date: today,
     time: '10:00',
@@ -134,7 +131,7 @@ const mockAppointments: Appointment[] = [
   },
   {
     id: 'a4',
-    petId: '4',
+    petId: 'd4e5f678-9012-3456-def0-456789012345',
     pet: mockPets[3],
     date: today,
     time: '10:30',
@@ -285,14 +282,14 @@ export function finalizeConsultation(appointmentId: string) {
     a.id === appointmentId ? { ...a, status: 'completed' as const } : a
   )
 
-  // Update pet medical notes if there's a diagnosis
+  // Update pet notes if there's a diagnosis
   if (appointment.diagnosis) {
     const summaryNote = `${new Date().toLocaleDateString()}: ${
       appointment.diagnosis
     }`
     pets = pets.map((p) =>
       p.id === appointment.petId
-        ? { ...p, medicalNotes: [summaryNote, ...p.medicalNotes].slice(0, 5) }
+        ? { ...p, notes: [summaryNote, ...p.notes].slice(0, 5) }
         : p
     )
     appointments = appointments.map((a) =>
@@ -301,7 +298,7 @@ export function finalizeConsultation(appointmentId: string) {
             ...a,
             pet: {
               ...a.pet,
-              medicalNotes: [summaryNote, ...a.pet.medicalNotes].slice(0, 5)
+              notes: [summaryNote, ...a.pet.notes].slice(0, 5)
             }
           }
         : a
